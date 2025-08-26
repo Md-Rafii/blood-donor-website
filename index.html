@@ -5,8 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
+
   <!-- হেডার -->
   <header class="bg-red-600 text-white text-center py-6 shadow-lg">
     <h1 class="text-3xl font-bold">বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
@@ -39,9 +43,84 @@
     </div>
   </section>
 
+  <!-- Donor List Section -->
+  <section class="max-w-6xl mx-auto py-12 px-6">
+    <h2 class="text-2xl font-bold text-center mb-6 text-red-600">🩸 রক্তদাতাদের তালিকা</h2>
+    <div class="overflow-x-auto shadow-lg rounded-xl">
+      <table class="w-full text-sm text-left border-collapse">
+        <thead class="bg-red-600 text-white">
+          <tr>
+            <th class="px-4 py-2">নাম</th>
+            <th class="px-4 py-2">গ্রুপ</th>
+            <th class="px-4 py-2">মোবাইল</th>
+            <th class="px-4 py-2">ঠিকানা</th>
+            <th class="px-4 py-2">সর্বশেষ রক্তদান</th>
+            <th class="px-4 py-2">মোট রক্তদান</th>
+            <th class="px-4 py-2">স্ট্যাটাস</th>
+          </tr>
+        </thead>
+        <tbody id="donorTable" class="bg-white divide-y divide-gray-200">
+          <!-- Firebase data আসবে এখানে -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- যোগাযোগ -->
+  <section class="bg-gray-200 py-12 text-center">
+    <h2 class="text-2xl font-bold mb-4">📩 আমাদের সাথে যোগাযোগ করুন</h2>
+    <p class="mb-2">📞 মোবাইল: ০১৭XXXXXXXX</p>
+    <p class="mb-2">📧 ইমেইল: bloodbank@gmail.com</p>
+    <p>📍 ঠিকানা: বায়েক আল হাজ্ব শাহ আলম কলেজ, কুমিল্লা</p>
+  </section>
+
   <!-- ফুটার -->
   <footer class="bg-red-600 text-white text-center py-4 mt-12">
     <p>© 2025 বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
   </footer>
+
+  <!-- Firebase Script -->
+  <script>
+    // Firebase Config (আপনার JSON থেকে নেওয়া)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBK9E7VBQBMFbtYfDgWTLhxTtnLQ_beXbM",
+      authDomain: "basc-blood-bank.firebaseapp.com",
+      databaseURL: "https://basc-blood-bank-default-rtdb.firebaseio.com",
+      projectId: "basc-blood-bank",
+      storageBucket: "basc-blood-bank.firebasestorage.app",
+      messagingSenderId: "854027391923",
+      appId: "1:854027391923:android:22003efb50f74cd78c71c6"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Donor Table
+    const donorTable = document.getElementById("donorTable");
+
+    db.ref("donors").on("value", snapshot => {
+      donorTable.innerHTML = "";
+      snapshot.forEach(child => {
+        const donor = child.val();
+        donorTable.innerHTML += `
+          <tr class="hover:bg-gray-100">
+            <td class="px-4 py-2">${donor.name || ""}</td>
+            <td class="px-4 py-2 font-bold text-red-600">${donor.type || ""}</td>
+            <td class="px-4 py-2"><a href="tel:${donor.mobile}" class="text-blue-600 underline">${donor.mobile || ""}</a></td>
+            <td class="px-4 py-2">${donor.address || ""}</td>
+            <td class="px-4 py-2">${donor.lastDonate || ""}</td>
+            <td class="px-4 py-2">${donor.total || ""}</td>
+            <td class="px-4 py-2">
+              <span class="px-2 py-1 rounded text-white ${donor.status === "Active" ? "bg-green-500" : "bg-gray-500"}">
+                ${donor.status || ""}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+    });
+  </script>
+
 </body>
 </html>
