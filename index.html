@@ -1,116 +1,216 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 text-gray-900 font-sans transition-colors duration-500">
 
-  <!-- হেডার -->
-  <header class="bg-red-600 text-white text-center py-6 shadow-lg">
-    <h1 class="text-3xl font-bold">বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
-    <p class="text-lg">জরুরী সময়ে রক্ত – জীবন বাঁচাতে আমরা আছি</p>
-  </header>
+<!-- Header -->
+<header class="bg-red-600 text-white text-center py-6 shadow-lg">
+  <h1 class="text-3xl font-bold">বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
+  <p class="text-lg">জরুরী সময়ে রক্ত – জীবন বাঁচাতে আমরা আছি</p>
+</header>
 
-  <!-- হিরো সেকশন -->
-  <section class="text-center py-12">
-    <img src="logo.png" alt="Logo" class="mx-auto w-32 mb-6 rounded-full shadow-lg">
-    <h2 class="text-2xl font-semibold mb-4">আমাদের Android অ্যাপ ডাউনলোড করুন</h2>
-    <a href="blooddonor.apk" download 
-       class="px-6 py-3 bg-red-600 text-white text-lg rounded-xl shadow hover:bg-red-700">
-       📥 Download APK
-    </a>
-  </section>
+<!-- Hero Section -->
+<section class="text-center py-12">
+  <img src="logo.png" alt="Logo" class="mx-auto w-32 mb-6 rounded-full shadow-lg">
+  <h2 class="text-2xl font-semibold mb-4">আমাদের Android অ্যাপ ডাউনলোড করুন</h2>
+  <div class="flex justify-center gap-4">
+    <a href="blooddonor.apk" download class="px-6 py-3 bg-red-600 text-white text-lg rounded-xl shadow hover:bg-red-700">📥 Download APK</a>
+    <button id="qrBtn" class="px-6 py-3 bg-gray-800 text-white text-lg rounded-xl shadow hover:bg-gray-900">📱 QR Code</button>
+  </div>
+  <div id="qrCode" class="mt-4"></div>
+</section>
 
-  <!-- ফিচার -->
-  <section class="max-w-4xl mx-auto py-12 grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-    <div class="bg-white shadow p-6 rounded-xl">
-      <h3 class="text-xl font-bold mb-2">👉 রক্তদাতাদের খুঁজুন</h3>
-      <p>সহজেই রক্তদাতা খুঁজে পান নির্দিষ্ট গ্রুপ অনুযায়ী।</p>
-    </div>
-    <div class="bg-white shadow p-6 rounded-xl">
-      <h3 class="text-xl font-bold mb-2">📞 জরুরী যোগাযোগ</h3>
-      <p>দ্রুত রক্তদাতাদের সাথে যোগাযোগের সুবিধা।</p>
-    </div>
-    <div class="bg-white shadow p-6 rounded-xl">
-      <h3 class="text-xl font-bold mb-2">💉 কমিউনিটি সাপোর্ট</h3>
-      <p>আমাদের সোসাইটির অংশ হয়ে জীবন বাঁচান।</p>
-    </div>
-  </section>
+<!-- Search & Filter -->
+<section class="max-w-6xl mx-auto py-6 px-6">
+  <div class="flex flex-col md:flex-row gap-4 md:justify-between mb-4">
+    <input id="searchInput" type="text" placeholder="নাম, মোবাইল বা ঠিকানা দিয়ে খুঁজুন..." class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 w-full md:w-1/2">
+    <select id="groupFilter" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 w-full md:w-1/4">
+      <option value="">সব গ্রুপ</option>
+      <option value="A Positive">A Positive</option>
+      <option value="B Positive">B Positive</option>
+      <option value="O Positive">O Positive</option>
+      <option value="AB Positive">AB Positive</option>
+    </select>
+  </div>
+</section>
 
-  <!-- Donor List Section -->
-  <section class="max-w-6xl mx-auto py-12 px-6">
-    <h2 class="text-2xl font-bold text-center mb-6 text-red-600">🩸 রক্তদাতাদের তালিকা</h2>
-    <div class="overflow-x-auto shadow-lg rounded-xl">
-      <table class="w-full text-sm text-left border-collapse">
-        <thead class="bg-red-600 text-white">
-          <tr>
-            <th class="px-4 py-2">নাম</th>
-            <th class="px-4 py-2">গ্রুপ</th>
-            <th class="px-4 py-2">মোবাইল</th>
-            <th class="px-4 py-2">ঠিকানা</th>
-            <th class="px-4 py-2">সর্বশেষ রক্তদান</th>
-            <th class="px-4 py-2">মোট রক্তদান</th>
-            <th class="px-4 py-2">স্ট্যাটাস</th>
-          </tr>
-        </thead>
-        <tbody id="donorTable" class="bg-white divide-y divide-gray-200">
-          <tr><td colspan="7" class="text-center py-4">ডেটা লোড হচ্ছে...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+<!-- Donor Summary -->
+<section class="max-w-6xl mx-auto py-4 px-6">
+  <div id="donorSummary" class="flex flex-wrap gap-4 justify-center"></div>
+</section>
 
-  <!-- যোগাযোগ -->
-  <section class="bg-gray-200 py-12 text-center">
-    <h2 class="text-2xl font-bold mb-4">📩 আমাদের সাথে যোগাযোগ করুন</h2>
-    <p class="mb-2">📞 মোবাইল: ০১৭XXXXXXXX</p>
-    <p class="mb-2">📧 ইমেইল: bloodbank@gmail.com</p>
-    <p>📍 ঠিকানা: বায়েক আল হাজ্ব শাহ আলম কলেজ, কুমিল্লা</p>
-  </section>
+<!-- Donor Table Section -->
+<section class="max-w-6xl mx-auto py-12 px-6">
+  <h2 class="text-2xl font-bold text-center mb-6 text-red-600">🩸 রক্তদাতাদের তালিকা</h2>
 
-  <!-- ফুটার -->
-  <footer class="bg-red-600 text-white text-center py-4 mt-12">
-    <p>© 2025 বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
-  </footer>
+  <!-- Table -->
+  <div class="overflow-x-auto shadow-lg rounded-xl hidden md:block">
+    <table class="w-full text-sm text-left border-collapse bg-white">
+      <thead class="bg-red-600 text-white">
+        <tr>
+          <th class="px-4 py-3">নাম</th>
+          <th class="px-4 py-3">গ্রুপ</th>
+          <th class="px-4 py-3">মোবাইল</th>
+          <th class="px-4 py-3">ঠিকানা</th>
+          <th class="px-4 py-3">সর্বশেষ রক্তদান</th>
+          <th class="px-4 py-3">মোট রক্তদান</th>
+          <th class="px-4 py-3">স্ট্যাটাস</th>
+        </tr>
+      </thead>
+      <tbody id="donorTable" class="divide-y divide-gray-200">
+        <tr><td colspan="7" class="text-center py-4">ডেটা লোড হচ্ছে...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <!-- Firebase Fetch Script (API Key ছাড়া) -->
-  <script>
-    const donorTable = document.getElementById("donorTable");
+  <!-- Card view for mobile -->
+  <div id="donorCards" class="grid grid-cols-1 md:hidden gap-4"></div>
+</section>
 
-    // Firebase REST API URL
-    const firebaseURL = "https://basc-blood-bank-default-rtdb.firebaseio.com/Users.json";
+<!-- Analytics Section -->
+<section class="max-w-4xl mx-auto py-12 px-6">
+  <h2 class="text-xl md:text-2xl font-bold text-center mb-6 text-red-600">📊 গ্রুপ ভিত্তিক বিশ্লেষণ</h2>
+  <canvas id="bloodChart" class="mx-auto" style="max-height:300px;"></canvas>
+</section>
 
-    fetch(firebaseURL)
-      .then(response => response.json())
-      .then(data => {
-        donorTable.innerHTML = "";
-        for (let key in data) {
-          const donor = data[key];
-          donorTable.innerHTML += `
-            <tr class="hover:bg-gray-100">
-              <td class="px-4 py-2">${donor.name || ""}</td>
-              <td class="px-4 py-2 font-bold text-red-600">${donor.type || ""}</td>
-              <td class="px-4 py-2"><a href="tel:${donor.mobile}" class="text-blue-600 underline">${donor.mobile || ""}</a></td>
-              <td class="px-4 py-2">${donor.address || ""}</td>
-              <td class="px-4 py-2">${donor.lastDonate || ""}</td>
-              <td class="px-4 py-2">${donor.total || ""}</td>
-              <td class="px-4 py-2">
-                <span class="px-2 py-1 rounded text-white ${donor.status === "Active" ? "bg-green-500" : "bg-gray-500"}">
-                  ${donor.status || ""}
-                </span>
-              </td>
-            </tr>
-          `;
-        }
-      })
-      .catch(error => {
-        donorTable.innerHTML = `<tr><td colspan="7" class="text-center text-red-600 py-4">ডেটা লোড করতে সমস্যা হয়েছে।</td></tr>`;
-        console.error("Firebase Fetch Error:", error);
-      });
-  </script>
+<!-- Footer -->
+<footer class="bg-red-600 text-white text-center py-4 mt-12">
+  <p>© 2025 বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
+</footer>
 
+<script>
+const donorTable = document.getElementById("donorTable");
+const donorCards = document.getElementById("donorCards");
+const searchInput = document.getElementById("searchInput");
+const groupFilter = document.getElementById("groupFilter");
+let donorsData = {};
+const firebaseURL = "https://basc-blood-bank-default-rtdb.firebaseio.com/Users.json";
+
+// Fetch Data
+fetch(firebaseURL)
+.then(res=>res.json())
+.then(data=>{
+  donorsData = data;
+  render();
+  renderChart();
+  renderSummary();
+})
+.catch(err=>console.error(err));
+
+// QR Code
+document.getElementById("qrBtn").addEventListener("click", ()=>{
+  const qr = new QRious({element: document.createElement('canvas'), value: "https://bloodbank.com/download"});
+  const qrDiv = document.getElementById("qrCode");
+  qrDiv.innerHTML=""; qrDiv.appendChild(qr.element);
+});
+
+// Badges for total donations
+function getBadge(total){
+  if(total>=20) return "🎖️";
+  if(total>=15) return "🥇";
+  if(total>=10) return "🏆";
+  if(total>=5) return "🏅";
+  return "";
+}
+
+// Render summary
+function renderSummary(){
+  const summaryDiv = document.getElementById("donorSummary");
+  const counts = {};
+  Object.values(donorsData).forEach(d=>{
+    counts[d.type] = (counts[d.type]||0)+1;
+  });
+  
+  summaryDiv.innerHTML = "";
+  const colors = {
+    "A Positive": "bg-red-500",
+    "B Positive": "bg-blue-500",
+    "O Positive": "bg-green-500",
+    "AB Positive": "bg-pink-400"
+  };
+  
+  Object.keys(counts).forEach(type=>{
+    const count = counts[type];
+    const colorClass = colors[type] || "bg-gray-400";
+    summaryDiv.innerHTML += `
+      <div class="px-4 py-2 rounded-xl text-white font-semibold ${colorClass}">
+        ${type}: ${count} জন
+      </div>
+    `;
+  });
+}
+
+// Render Table & Cards
+function render(){
+  const searchText = searchInput.value.toLowerCase();
+  const groupText = groupFilter.value;
+  const today = new Date();
+  const filtered = Object.values(donorsData).filter(d =>
+    d.name.toLowerCase().includes(searchText) &&
+    (groupText==="" || d.type===groupText)
+  );
+
+  // Table
+  donorTable.innerHTML="";
+  if(filtered.length===0) donorTable.innerHTML='<tr><td colspan="7" class="text-center py-4">কোনও ডোনার পাওয়া যায়নি।</td></tr>';
+  else filtered.forEach(d=>{
+    const lastDonateDate = new Date(d.lastDonate);
+    const isRecent = (today-lastDonateDate)/(1000*60*60*24)<=30;
+    donorTable.innerHTML+=`
+      <tr class="hover:bg-gray-100 ${isRecent?'bg-yellow-50':''}">
+        <td class="px-4 py-2 font-medium">${d.name}</td>
+        <td class="px-4 py-2 font-bold text-red-600">${d.type}</td>
+        <td class="px-4 py-2"><a href="tel:${d.mobile}" class="text-blue-600 underline">${d.mobile}</a></td>
+        <td class="px-4 py-2">${d.address}</td>
+        <td class="px-4 py-2">${d.lastDonate}</td>
+        <td class="px-4 py-2">${d.total} ${getBadge(d.total)}</td>
+        <td class="px-4 py-2"><span class="px-2 py-1 rounded text-white ${d.status==="Active"?"bg-green-500":"bg-gray-500"}">${d.status}</span></td>
+      </tr>`;
+  });
+
+  // Cards
+  donorCards.innerHTML="";
+  if(filtered.length===0) donorCards.innerHTML='<p class="text-center py-4">কোনও ডোনার পাওয়া যায়নি।</p>';
+  else filtered.forEach(d=>{
+    const lastDonateDate = new Date(d.lastDonate);
+    const isRecent = (today-lastDonateDate)/(1000*60*60*24)<=30;
+    donorCards.innerHTML+=`
+      <div class="bg-white shadow p-4 rounded-xl border-l-4 ${d.status==="Active"?"border-green-500":"border-gray-500"} ${isRecent?'bg-yellow-50':''}">
+        <h3 class="text-lg font-bold mb-1">${d.name}</h3>
+        <p><span class="font-semibold">গ্রুপ:</span> ${d.type}</p>
+        <p><span class="font-semibold">মোবাইল:</span> <a href="tel:${d.mobile}" class="text-blue-600 underline">${d.mobile}</a></p>
+        <p><span class="font-semibold">ঠিকানা:</span> ${d.address}</p>
+        <p><span class="font-semibold">সর্বশেষ রক্তদান:</span> ${d.lastDonate}</p>
+        <p><span class="font-semibold">মোট রক্তদান:</span> ${d.total} ${getBadge(d.total)}</p>
+        <p><span class="font-semibold">স্ট্যাটাস:</span> <span class="px-2 py-1 rounded text-white ${d.status==="Active"?"bg-green-500":"bg-gray-500"}">${d.status}</span></p>
+      </div>`;
+  });
+}
+
+// Render Chart
+function renderChart(){
+  const counts={};
+  Object.values(donorsData).forEach(d=>{ counts[d.type]= (counts[d.type]||0)+1; });
+  const ctx = document.getElementById("bloodChart").getContext("2d");
+  new Chart(ctx,{
+    type:'pie',
+    data:{
+      labels:Object.keys(counts).map(type=>`${type} (${counts[type]})`),
+      datasets:[{data:Object.values(counts), backgroundColor:['#f87171','#60a5fa','#34d399','#f9a8d4']}]
+    },
+    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+searchInput.addEventListener("input", render);
+groupFilter.addEventListener("change", render);
+</script>
 </body>
 </html>
