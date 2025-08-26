@@ -81,11 +81,11 @@
 
   <!-- Firebase Script -->
   <script>
-    // Firebase Config (আপনার JSON থেকে নেওয়া)
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBK9E7VBQBMFbtYfDgWTLhxTtnLQ_beXbM",
       authDomain: "basc-blood-bank.firebaseapp.com",
-      databaseURL: "https://basc-blood-bank-default-rtdb.firebaseio.com",
+      databaseURL: "https://basc-blood-bank-default-rtdb.firebaseio.com/",
       projectId: "basc-blood-bank",
       storageBucket: "basc-blood-bank.firebasestorage.app",
       messagingSenderId: "854027391923",
@@ -99,7 +99,7 @@
     // Donor Table
     const donorTable = document.getElementById("donorTable");
 
-    db.ref("donors").on("value", snapshot => {
+    db.ref("Users").on("value", snapshot => {
       donorTable.innerHTML = "";
       snapshot.forEach(child => {
         const donor = child.val();
