@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>বায়েক আলহাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
+<title>বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -12,7 +12,7 @@
 
 <!-- Header -->
 <header class="bg-red-600 text-white text-center py-6 shadow-lg">
-  <h1 class="text-3xl font-bold">বায়েক আলহাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
+  <h1 class="text-3xl font-bold">বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
   <p class="text-lg">জরুরী সময়ে রক্ত – জীবন বাঁচাতে আমরা আছি</p>
 </header>
 
@@ -34,13 +34,13 @@
     <select id="groupFilter" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 w-full md:w-1/4">
       <option value="">সব গ্রুপ</option>
       <option value="A Positive">A Positive</option>
+      <option value="A Negative">A Negative</option>
       <option value="B Positive">B Positive</option>
+      <option value="B Negative">B Negative</option>
       <option value="O Positive">O Positive</option>
+      <option value="O Negative">O Negative</option>
       <option value="AB Positive">AB Positive</option>
-      <option value="A Positive">A Negative</option>
-      <option value="B Positive">B Negative</option>
-      <option value="O Positive">O Negative</option>
-      <option value="AB Positive">AB Negative</option>
+      <option value="AB Negative">AB Negative</option>
     </select>
   </div>
 </section>
@@ -86,7 +86,7 @@
 
 <!-- Footer -->
 <footer class="bg-red-600 text-white text-center py-4 mt-12">
-  <p>© 2025 বায়েক আলহাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
+  <p>© 2025 বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
 </footer>
 
 <script>
@@ -135,13 +135,13 @@ function renderSummary(){
   summaryDiv.innerHTML = "";
   const colors = {
     "A Positive": "bg-red-500",
+    "A Negative": "bg-red-300",
     "B Positive": "bg-blue-500",
+    "B Negative": "bg-blue-300",
     "O Positive": "bg-green-500",
-    "AB Positive": "bg-pink-400"
-    "A Negative": "bg-red-500",
-    "B Negative": "bg-blue-500",
-    "O Negative": "bg-green-500",
-    "AB Negative": "bg-pink-400"
+    "O Negative": "bg-green-300",
+    "AB Positive": "bg-pink-400",
+    "AB Negative": "bg-pink-200"
   };
   
   Object.keys(counts).forEach(type=>{
@@ -211,7 +211,12 @@ function renderChart(){
     type:'pie',
     data:{
       labels:Object.keys(counts).map(type=>`${type} (${counts[type]})`),
-      datasets:[{data:Object.values(counts), backgroundColor:['#f87171','#60a5fa','#34d399','#f9a8d4']}]
+      datasets:[{data:Object.values(counts), backgroundColor:[
+        '#f87171','#fca5a5', // A+ , A-
+        '#60a5fa','#93c5fd', // B+ , B-
+        '#34d399','#86efac', // O+ , O-
+        '#f9a8d4','#fbcfe8'  // AB+ , AB-
+      ]}]
     },
     options:{responsive:true, plugins:{legend:{position:'bottom'}}}
   });
