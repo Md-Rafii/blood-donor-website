@@ -1,229 +1,1489 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BASC Blood Bank - রক্তের জন্য একটু সহযোগিতা</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="বায়েক আলহাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক - জরুরী রক্তের প্রয়োজনে ২৪/৭ সেবা">
+    <meta name="keywords" content="ব্লাড ব্যাংক, রক্তদান, চাঁদপুর, BASC, রক্তের গ্রুপ, জরুরী রক্ত">
+    <meta name="author" content="BASC Blood Bank Society">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            font-family: 'Noto Sans Bengali', sans-serif;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #e53e3e, #3182ce);
+            border-radius: 10px;
+        }
+        
+        /* Blood Drop Animation */
+        @keyframes drop {
+            0% {
+                transform: translateY(-100px) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+        
+        .blood-drop {
+            position: fixed;
+            width: 4px;
+            height: 8px;
+            background: #e53e3e;
+            border-radius: 50% 50% 0% 50%;
+            transform: rotate(45deg);
+            animation: drop 15s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Blood Group Badges */
+        .bg-blood-red { background: linear-gradient(135deg, #fed7d7, #e53e3e); }
+        .bg-blood-blue { background: linear-gradient(135deg, #bee3f8, #3182ce); }
+        .bg-blood-green { background: linear-gradient(135deg, #c6f6d5, #38a169); }
+        .bg-blood-purple { background: linear-gradient(135deg, #e9d8fd, #805ad5); }
+        
+        /* Card Hover Effect */
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Status Badges */
+        .status-active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .status-inactive {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+        
+        .status-unknown {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        /* Mobile Menu Animation */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .mobile-menu {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* Pulse Animation for Emergency Button */
+        @keyframes pulse-emergency {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(220, 38, 38, 0);
+            }
+        }
+        
+        .pulse-emergency {
+            animation: pulse-emergency 2s infinite;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans transition-colors duration-500">
+<body class="bg-gray-50 text-gray-800">
+    
+    <!-- Animated Blood Drops Background -->
+    <div id="bloodDrops" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <!-- Drops will be added by JavaScript -->
+    </div>
+    
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
+        <nav class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">BASC ব্লাড ব্যাংক</h1>
+                        <p class="text-xs text-gray-600">জীবন বাঁচানোর ব্রত</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-red-600 font-medium transition">হোম</a>
+                    <a href="#donors" class="text-gray-700 hover:text-red-600 font-medium transition">রক্তদাতা</a>
+                    <a href="#stats" class="text-gray-700 hover:text-red-600 font-medium transition">পরিসংখ্যান</a>
+                    <a href="#benefits" class="text-gray-700 hover:text-red-600 font-medium transition">উপকারিতা</a>
+                    <a href="#contact" class="text-gray-700 hover:text-red-600 font-medium transition">যোগাযোগ</a>
+                </div>
+                
+                <!-- Emergency Button -->
+                <a href="tel:01711234567" 
+                   class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center space-x-2 pulse-emergency">
+                    <i class="fas fa-phone"></i>
+                    <span class="hidden sm:inline">জরুরী কল</span>
+                </a>
+                
+                <!-- Mobile Menu Button -->
+                <button id="menuToggle" class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden fixed inset-0 bg-white z-40 hidden">
+            <div class="flex flex-col h-full">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h2 class="text-xl font-bold text-gray-800">মেনু</h2>
+                    <button id="closeMenu" class="text-gray-600">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="flex-1 p-4 space-y-4">
+                    <a href="#home" class="block py-3 px-4 bg-red-50 text-red-600 rounded-lg font-medium">হোম</a>
+                    <a href="#donors" class="block py-3 px-4 hover:bg-gray-100 rounded-lg font-medium">রক্তদাতা</a>
+                    <a href="#stats" class="block py-3 px-4 hover:bg-gray-100 rounded-lg font-medium">পরিসংখ্যান</a>
+                    <a href="#benefits" class="block py-3 px-4 hover:bg-gray-100 rounded-lg font-medium">উপকারিতা</a>
+                    <a href="#contact" class="block py-3 px-4 hover:bg-gray-100 rounded-lg font-medium">যোগাযোগ</a>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<!-- Header -->
-<header class="bg-red-600 text-white text-center py-6 shadow-lg">
-  <h1 class="text-3xl font-bold">বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</h1>
-  <p class="text-lg">জরুরী সময়ে রক্ত – জীবন বাঁচাতে আমরা আছি</p>
-</header>
+    <!-- Hero Section -->
+    <section id="home" class="pt-24 pb-12 md:pt-32 md:pb-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-red-50 via-white to-blue-50"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <!-- Left Content -->
+                    <div>
+                        <span class="inline-block px-4 py-2 bg-red-100 text-red-700 rounded-full font-medium mb-6">
+                            <i class="fas fa-calendar-alt mr-2"></i>২০২১ সাল থেকে সেবা
+                        </span>
+                        <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                            <span class="text-red-600">এক ফোঁটা রক্ত</span><br>
+                            <span class="text-gray-800">একটি জীবন বাঁচাতে পারে</span>
+                        </h1>
+                        <p class="text-lg text-gray-600 mb-8">
+                            বায়েক আলহাজ্ব শাহ আলম কলেজের সম্মানিত রক্তদাতাদের সংগ্রহস্থল। 
+                            জরুরী রক্তের প্রয়োজনে আমরা আছি আপনার পাশে ২৪/৭।
+                        </p>
+                        
+                        <!-- Stats -->
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white rounded-xl p-4 shadow-sm border text-center">
+                                <div class="text-2xl font-bold text-red-600" id="totalDonors">0</div>
+                                <div class="text-sm text-gray-600">সক্রিয় ডোনার</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border text-center">
+                                <div class="text-2xl font-bold text-blue-600" id="totalDonations">0</div>
+                                <div class="text-sm text-gray-600">মোট রক্তদান</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border text-center">
+                                <div class="text-2xl font-bold text-green-600" id="readyDonors">0</div>
+                                <div class="text-sm text-gray-600">জরুরী প্রস্তুত</div>
+                            </div>
+                        </div>
+                        
+                        <!-- CTA Buttons -->
+                        <div class="flex flex-wrap gap-4">
+                            <a href="#donors" 
+                               class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition shadow-lg flex items-center space-x-2">
+                                <i class="fas fa-search"></i>
+                                <span>রক্তদাতা খুঁজুন</span>
+                            </a>
+                            <button onclick="openDonorForm()" 
+                                    class="px-6 py-3 bg-white text-red-600 border-2 border-red-600 rounded-xl font-medium hover:bg-red-50 transition shadow-lg flex items-center space-x-2">
+                                <i class="fas fa-user-plus"></i>
+                                <span>নিবন্ধন করুন</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Content -->
+                    <div class="relative">
+                        <div class="bg-white rounded-2xl p-8 shadow-xl border hover-card">
+                            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">আমাদের অ্যাপ ডাউনলোড করুন</h3>
+                            
+                            <div class="relative mb-8">
+                                <div class="w-64 h-64 mx-auto bg-gradient-to-br from-red-50 to-blue-50 rounded-2xl flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="w-20 h-20 mx-auto mb-4 bg-red-600 rounded-full flex items-center justify-center animate-pulse">
+                                            <i class="fas fa-heartbeat text-white text-3xl"></i>
+                                        </div>
+                                        <h4 class="text-xl font-bold text-gray-800">BASC Blood Bank</h4>
+                                        <p class="text-gray-600 mt-2">Android Application</p>
+                                    </div>
+                                </div>
+                                <div class="absolute -top-4 -right-4 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center animate-bounce">
+                                    <i class="fas fa-download text-white text-2xl"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <a href="blooddonor.apk" download 
+                                   class="block px-6 py-3 bg-red-600 text-white rounded-xl font-medium text-center hover:bg-red-700 transition shadow-lg">
+                                    <i class="fas fa-download mr-2"></i>Android APK ডাউনলোড
+                                </a>
+                                <button onclick="showQR()" 
+                                        class="w-full px-6 py-3 bg-gray-800 text-white rounded-xl font-medium text-center hover:bg-gray-900 transition shadow-lg">
+                                    <i class="fas fa-qrcode mr-2"></i>QR Code দেখুন
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Hero Section -->
-<section class="text-center py-12">
-  <img src="logo.png" alt="Logo" class="mx-auto w-32 mb-6 rounded-full shadow-lg">
-  <h2 class="text-2xl font-semibold mb-4">আমাদের Android অ্যাপ ডাউনলোড করুন</h2>
-  <div class="flex justify-center gap-4">
-    <a href="blooddonor.apk" download class="px-6 py-3 bg-red-600 text-white text-lg rounded-xl shadow hover:bg-red-700">📥 Download APK</a>
-    <button id="qrBtn" class="px-6 py-3 bg-gray-800 text-white text-lg rounded-xl shadow hover:bg-gray-900">📱 QR Code</button>
-  </div>
-  <div id="qrCode" class="mt-4"></div>
-</section>
+    <!-- Search Section -->
+    <section id="donors" class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold mb-4 text-gray-800">রক্তদাতা খুঁজুন</h2>
+                    <p class="text-gray-600">প্রয়োজন অনুযায়ী রক্তের গ্রুপ ও এলাকা দিয়ে খুঁজুন</p>
+                </div>
+                
+                <!-- Search Box -->
+                <div class="bg-gradient-to-r from-red-50 to-blue-50 rounded-2xl p-6 mb-8 shadow-lg">
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <!-- Search Input -->
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" 
+                                   id="searchBox"
+                                   placeholder="নাম বা মোবাইল নম্বর"
+                                   class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        </div>
+                        
+                        <!-- Blood Group Filter -->
+                        <select id="bloodFilter" 
+                                class="px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="">সব রক্তের গ্রুপ</option>
+                            <option value="A+">A+ (পজিটিভ)</option>
+                            <option value="A-">A- (নেগেটিভ)</option>
+                            <option value="B+">B+ (পজিটিভ)</option>
+                            <option value="B-">B- (নেগেটিভ)</option>
+                            <option value="O+">O+ (পজিটিভ)</option>
+                            <option value="O-">O- (নেগেটিভ)</option>
+                            <option value="AB+">AB+ (পজিটিভ)</option>
+                            <option value="AB-">AB- (নেগেটিভ)</option>
+                        </select>
+                        
+                        <!-- Area Filter -->
+                        <select id="locationFilter" 
+                                class="px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="">সব এলাকা</option>
+                            <option value="কসবা">কসবা</option>
+                            <option value="বায়েক">বায়েক</option>
+                            <option value="নয়নপুর">নয়নপুর</option>
+                            <option value="মাদলা">মাদলা</option>
+                            <option value="কোল্লাপাথর">কোল্লাপাথর</option>
+                            
+                        </select>
+                        
+                        <!-- Search Button -->
+                        <button onclick="searchData()" 
+                                class="px-4 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition shadow">
+                            <i class="fas fa-search mr-2"></i>খুঁজুন
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div class="mt-6">
+                        <p class="text-sm font-medium text-gray-700 mb-3">দ্রুত ফিল্টার:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="filterByGroup('A+')" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition">A+</button>
+                            <button onclick="filterByGroup('B+')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">B+</button>
+                            <button onclick="filterByGroup('O+')" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">O+</button>
+                            <button onclick="filterByGroup('AB+')" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">AB+</button>
+                            <button onclick="clearFilters()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                <i class="fas fa-times mr-1"></i>রিসেট করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Blood Group Summary -->
+                <div class="mb-10">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">রক্তের গ্রুপ অনুযায়ী ডোনার</h3>
+                    <div id="bloodSummary" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+                        <!-- Summary cards will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Results -->
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">রক্তদাতাদের তালিকা</h3>
+                        <div class="text-gray-600" id="resultInfo">মোট <span class="font-bold text-red-600">0</span> জন</div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="loadingState" class="text-center py-12">
+                        <div class="inline-flex flex-col items-center">
+                            <div class="w-16 h-16 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mb-4"></div>
+                            <p class="text-gray-600 font-medium">রক্তদাতাদের তথ্য লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Desktop Table -->
+                    <div id="tableContainer" class="hidden lg:block">
+                        <div class="bg-white rounded-2xl shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-red-600 text-white">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left">নাম</th>
+                                            <th class="px-6 py-4 text-left">রক্তের গ্রুপ</th>
+                                            <th class="px-6 py-4 text-left">মোবাইল</th>
+                                            <th class="px-6 py-4 text-left">ঠিকানা</th>
+                                            <th class="px-6 py-4 text-left">সর্বশেষ দান</th>
+                                            <th class="px-6 py-4 text-left">দিন পার</th>
+                                            <th class="px-6 py-4 text-left">স্ট্যাটাস</th>
+                                            <th class="px-6 py-4 text-left">যোগাযোগ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="donorTable" class="divide-y divide-gray-200">
+                                        <!-- Table data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Cards -->
+                    <div id="cardsContainer" class="lg:hidden">
+                        <div id="donorCards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Cards will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- No Results -->
+                    <div id="noResults" class="hidden text-center py-12">
+                        <div class="max-w-md mx-auto">
+                            <div class="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user-slash text-5xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-gray-800">কোন রক্তদাতা পাওয়া যায়নি</h3>
+                            <p class="text-gray-600 mb-6">আপনার সার্চের সাথে মিলিয়ে কোন রক্তদাতা পাওয়া যায়নি</p>
+                            <button onclick="clearFilters()" 
+                                    class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition">
+                                সব ফিল্টার রিসেট করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Search & Filter -->
-<section class="max-w-6xl mx-auto py-6 px-6">
-  <div class="flex flex-col md:flex-row gap-4 md:justify-between mb-4">
-    <input id="searchInput" type="text" placeholder="নাম, মোবাইল বা ঠিকানা দিয়ে খুঁজুন..." class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 w-full md:w-1/2">
-    <select id="groupFilter" class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 w-full md:w-1/4">
-      <option value="">সব গ্রুপ</option>
-      <option value="A Positive">A Positive</option>
-      <option value="A Negative">A Negative</option>
-      <option value="B Positive">B Positive</option>
-      <option value="B Negative">B Negative</option>
-      <option value="O Positive">O Positive</option>
-      <option value="O Negative">O Negative</option>
-      <option value="AB Positive">AB Positive</option>
-      <option value="AB Negative">AB Negative</option>
-    </select>
-  </div>
-</section>
+    <!-- Statistics Section -->
+    <section id="stats" class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold mb-4 text-gray-800">পরিসংখ্যান</h2>
+                    <p class="text-gray-600">রক্তদান সম্পর্কিত গুরুত্বপূর্ণ পরিসংখ্যান</p>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Chart -->
+                    <div class="bg-white rounded-2xl p-6 shadow border">
+                        <h3 class="text-xl font-bold mb-6 text-gray-800">গ্রুপ অনুযায়ী ডোনার বন্টন</h3>
+                        <canvas id="bloodChart" height="300"></canvas>
+                    </div>
+                    
+                    <!-- Statistics Info -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-2xl p-6 shadow border">
+                            <h3 class="text-xl font-bold mb-4 text-gray-800">গুরুত্বপূর্ণ তথ্য</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                    <div>
+                                        <div class="font-bold text-red-700">সবচেয়ে বেশি চাহিদা</div>
+                                        <div class="text-sm text-gray-600">A+ এবং O+ গ্রুপ</div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-red-700">৬৫%</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                    <div>
+                                        <div class="font-bold text-blue-700">সার্বজনীন দাতা</div>
+                                        <div class="text-sm text-gray-600">O- গ্রুপ</div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-blue-700">৭%</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                    <div>
+                                        <div class="font-bold text-green-700">সার্বজনীন গ্রহীতা</div>
+                                        <div class="text-sm text-gray-600">AB+ গ্রুপ</div>
+                                    </div>
+                                    <div class="text-2xl font-bold text-green-700">৩%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Emergency Call -->
+                        <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">জরুরী রক্তের প্রয়োজন?</h3>
+                            <p class="mb-6">আমাদের ইমার্জেন্সি টিম ২৪ ঘন্টাই প্রস্তুত আপনার সাহায্যের জন্য</p>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="tel:01711234567" 
+                                   class="px-6 py-3 bg-white text-red-600 rounded-xl font-bold text-center hover:bg-gray-100 transition shadow">
+                                    <i class="fas fa-phone-alt mr-2"></i>কল করুন
+                                </a>
+                                <button onclick="openEmergencyForm()" 
+                                        class="px-6 py-3 bg-white/20 text-white border border-white rounded-xl font-bold hover:bg-white/30 transition">
+                                    <i class="fas fa-ambulance mr-2"></i>জরুরী অনুরোধ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Donor Summary -->
-<section class="max-w-6xl mx-auto py-4 px-6">
-  <div id="donorSummary" class="flex flex-wrap gap-4 justify-center"></div>
-</section>
+    <!-- Benefits Section -->
+    <section id="benefits" class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold mb-4 text-gray-800">রক্তদানের উপকারিতা</h2>
+                    <p class="text-gray-600">রক্তদান শুধু অন্যকে জীবন দেয় না, আপনার নিজের জন্যও উপকারী</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Benefit 1 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-heart text-red-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">হৃদরোগের ঝুঁকি কমায়</h3>
+                        <p class="text-gray-600">নিয়মিত রক্তদান রক্তের আয়রনের মাত্রা কমিয়ে হৃদরোগের ঝুঁকি ৩০% পর্যন্ত কমাতে পারে।</p>
+                    </div>
+                    
+                    <!-- Benefit 2 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-bone text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">নতুন রক্তকণিকা তৈরি</h3>
+                        <p class="text-gray-600">রক্তদানের ৪৮ ঘন্টার মধ্যে নতুন রক্তকণিকা তৈরি হয়, যা শরীরকে সতেজ ও সক্রিয় রাখে।</p>
+                    </div>
+                    
+                    <!-- Benefit 3 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-weight text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">ক্যালোরি বার্ন করে</h3>
+                        <p class="text-gray-600">প্রতি রক্তদানে ৬৫০ ক্যালোরি খরচ হয়, যা ওজন নিয়ন্ত্রণে সাহায্য করে।</p>
+                    </div>
+                    
+                    <!-- Benefit 4 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-stethoscope text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">মেডিকেল চেকআপ</h3>
+                        <p class="text-gray-600">রক্তদানের সময় ব্লাড প্রেসার, হিমোগ্লোবিন, ওজনসহ বিনামূল্যে স্বাস্থ্য পরীক্ষা হয়।</p>
+                    </div>
+                    
+                    <!-- Benefit 5 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-smile text-yellow-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">মানসিক প্রশান্তি</h3>
+                        <p class="text-gray-600">জীবন বাঁচানোর সুযোগ পেলে মানসিক প্রশান্তি ও আত্মতৃপ্তি আসে, ডিপ্রেশন কমে।</p>
+                    </div>
+                    
+                    <!-- Benefit 6 -->
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border hover-card">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-shield-alt text-indigo-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-gray-800">ইমিউন সিস্টেম</h3>
+                        <p class="text-gray-600">নতুন রক্তকণিকা তৈরির মাধ্যমে রোগ প্রতিরোধ ক্ষমতা শক্তিশালী হয়।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Donor Table Section -->
-<section class="max-w-6xl mx-auto py-12 px-6">
-  <h2 class="text-2xl font-bold text-center mb-6 text-red-600">🩸 রক্তদাতাদের তালিকা</h2>
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-900 text-white pt-12 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- About -->
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">BASC ব্লাড ব্যাংক</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        ২০২১ সাল থেকে বায়েকের একমাত্র কলেজ ভিত্তিক রক্তদান সংগঠন। 
+                        জীবন বাঁচানোর ব্রত নিয়ে আমরা কাজ করে যাচ্ছি।
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6">দ্রুত লিংক</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#donors" class="text-gray-300 hover:text-white transition flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-red-500"></i>রক্তদাতা খুঁজুন
+                        </a></li>
+                        <li><a href="#benefits" class="text-gray-300 hover:text-white transition flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-red-500"></i>রক্তদানের উপকারিতা
+                        </a></li>
+                        <li><a href="#" onclick="openDonorForm()" class="text-gray-300 hover:text-white transition flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-red-500"></i>রক্তদাতা নিবন্ধন
+                        </a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-white transition flex items-center gap-2">
+                            <i class="fas fa-chevron-right text-xs text-red-500"></i>যোগাযোগ
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6">যোগাযোগ</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-phone text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">জরুরী কল</p>
+                                <a href="tel:01711234567" class="font-medium hover:text-red-400">০১৯৯৯৮৪২০৪১</a>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-envelope text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">ইমেইল</p>
+                                <a href="mailto:bloodbank@basc.edu.bd" class="font-medium hover:text-red-400">mdraffi530@gmail.com</a>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-red-900 rounded-lg flex items-center justify-center mt-1">
+                                <i class="fas fa-map-marker-alt text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">ঠিকানা</p>
+                                <p>বায়েক আলহাজ্ব শাহ আলম কলেজ, বায়েক, কসবা</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Timing -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6">সেবার সময়</h4>
+                    <ul class="space-y-3 text-gray-300">
+                      
+                        <li class="flex justify-between">
+                            <span>প্রতিদিন</span>
+                            <span class="font-medium">২৪ ঘন্টা জরুরী সেবা</span>
+                        </li>
+                    </ul>
+                    <div class="mt-8 p-4 bg-gray-800 rounded-lg">
+                        <p class="text-sm mb-3">জরুরী রক্তের প্রয়োজন হলে এখনই কল করুন</p>
+                        <a href="tel:01711234567" class="block w-full px-4 py-2 bg-red-600 text-white text-center rounded-lg font-medium hover:bg-red-700 transition">
+                            <i class="fas fa-phone mr-2"></i>জরুরী কল ০১৯৯৯৮৪২০৪১
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 text-center">
+                <p class="mb-2">© ২০২১-২০২৫ বায়েক আলহাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি | বায়েক</p>
+                <p class="text-sm text-gray-400">"রক্তদান মহান - এক ব্যাগ রক্ত অসংখ্য জীবন"</p>
+            </div>
+        </div>
+    </footer>
 
-  <!-- Table -->
-  <div class="overflow-x-auto shadow-lg rounded-xl hidden md:block">
-    <table class="w-full text-sm text-left border-collapse bg-white">
-      <thead class="bg-red-600 text-white">
-        <tr>
-          <th class="px-4 py-3">নাম</th>
-          <th class="px-4 py-3">গ্রুপ</th>
-          <th class="px-4 py-3">মোবাইল</th>
-          <th class="px-4 py-3">ঠিকানা</th>
-          <th class="px-4 py-3">সর্বশেষ রক্তদান</th>
-          <th class="px-4 py-3">মোট রক্তদান</th>
-          <th class="px-4 py-3">স্ট্যাটাস</th>
-        </tr>
-      </thead>
-      <tbody id="donorTable" class="divide-y divide-gray-200">
-        <tr><td colspan="7" class="text-center py-4">ডেটা লোড হচ্ছে...</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <a href="tel:01711234567" 
+           class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-800 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all hover:scale-110 flex items-center justify-center pulse-emergency">
+            <i class="fas fa-phone-alt text-2xl"></i>
+        </a>
+    </div>
 
-  <!-- Card view for mobile -->
-  <div id="donorCards" class="grid grid-cols-1 md:hidden gap-4"></div>
-</section>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 right-6 z-50 transform translate-x-full transition-transform duration-300">
+        <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-sm">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+                <p class="font-semibold" id="toastTitle">সফল!</p>
+                <p id="toastMessage">অপারেশন সফলভাবে সম্পন্ন হয়েছে</p>
+            </div>
+        </div>
+    </div>
 
-<!-- Analytics Section -->
-<section class="max-w-4xl mx-auto py-12 px-6">
-  <h2 class="text-xl md:text-2xl font-bold text-center mb-6 text-red-600">📊 গ্রুপ ভিত্তিক বিশ্লেষণ</h2>
-  <canvas id="bloodChart" class="mx-auto" style="max-height:300px;"></canvas>
-</section>
+    <!-- Donor Registration Modal -->
+    <div id="donorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">রক্তদাতা নিবন্ধন ফর্ম</h3>
+                <button onclick="closeModal('donorModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="donorForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">নাম *</label>
+                    <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">মোবাইল নম্বর *</label>
+                    <input type="tel" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">রক্তের গ্রুপ *</label>
+                    <select required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="">সিলেক্ট করুন</option>
+                        <option value="A+">A+ (পজিটিভ)</option>
+                        <option value="A-">A- (নেগেটিভ)</option>
+                        <option value="B+">B+ (পজিটিভ)</option>
+                        <option value="B-">B- (নেগেটিভ)</option>
+                        <option value="O+">O+ (পজিটিভ)</option>
+                        <option value="O-">O- (নেগেটিভ)</option>
+                        <option value="AB+">AB+ (পজিটিভ)</option>
+                        <option value="AB-">AB- (নেগেটিভ)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ঠিকানা *</label>
+                    <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <button type="submit" 
+                        class="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>নিবন্ধন করুন
+                </button>
+            </form>
+        </div>
+    </div>
 
-<!-- Footer -->
-<footer class="bg-red-600 text-white text-center py-4 mt-12">
-  <p>© 2025 বায়েক আল হাজ্ব শাহ আলম কলেজ ব্লাড ব্যাংক সোসাইটি</p>
-</footer>
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">QR Code স্ক্যান করুন</h3>
+                <button onclick="closeModal('qrModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="text-center">
+                <div class="bg-gradient-to-br from-red-50 to-blue-50 rounded-xl p-8 mb-6 inline-block">
+                    <i class="fas fa-mobile-alt text-6xl text-red-600 mb-4"></i>
+                    <p class="font-bold text-gray-800">BASC Blood Bank</p>
+                </div>
+                <p class="text-gray-600 mb-6">এই QR Code টি স্ক্যান করে অ্যাপ ডাউনলোড করুন</p>
+                <a href="blooddonor.apk" download 
+                   class="block px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition">
+                    <i class="fas fa-download mr-2"></i>সরাসরি ডাউনলোড করুন
+                </a>
+            </div>
+        </div>
+    </div>
 
-<script>
-const donorTable = document.getElementById("donorTable");
-const donorCards = document.getElementById("donorCards");
-const searchInput = document.getElementById("searchInput");
-const groupFilter = document.getElementById("groupFilter");
-let donorsData = {};
-const firebaseURL = "https://basc-blood-bank-default-rtdb.firebaseio.com/Users.json";
+    <!-- Emergency Request Modal -->
+    <div id="emergencyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">জরুরী রক্তের অনুরোধ</h3>
+                <button onclick="closeModal('emergencyModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="emergencyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">রোগীর নাম *</label>
+                    <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">প্রয়োজনীয় রক্তের গ্রুপ *</label>
+                    <select required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="">সিলেক্ট করুন</option>
+                        <option value="A+">A+ (পজিটিভ)</option>
+                        <option value="A-">A- (নেগেটিভ)</option>
+                        <option value="B+">B+ (পজিটিভ)</option>
+                        <option value="B-">B- (নেগেটিভ)</option>
+                        <option value="O+">O+ (পজিটিভ)</option>
+                        <option value="O-">O- (নেগেটিভ)</option>
+                        <option value="AB+">AB+ (পজিটিভ)</option>
+                        <option value="AB-">AB- (নেগেটিভ)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">যোগাযোগ নম্বর *</label>
+                    <input type="tel" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">হাসপাতালের নাম *</label>
+                                    <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <button type="submit" 
+                        class="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>অনুরোধ পাঠান
+                </button>
+            </form>
+        </div>
+    </div>
 
-// Fetch Data
-fetch(firebaseURL)
-.then(res=>res.json())
-.then(data=>{
-  donorsData = data;
-  render();
-  renderChart();
-  renderSummary();
-})
-.catch(err=>console.error(err));
-
-// QR Code
-document.getElementById("qrBtn").addEventListener("click", ()=>{
-  const qr = new QRious({element: document.createElement('canvas'), value: "https://bloodbank.com/download"});
-  const qrDiv = document.getElementById("qrCode");
-  qrDiv.innerHTML=""; qrDiv.appendChild(qr.element);
-});
-
-// Badges for total donations
-function getBadge(total){
-  if(total>=20) return "🎖️";
-  if(total>=15) return "🥇";
-  if(total>=10) return "🏆";
-  if(total>=5) return "🏅";
-  return "";
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBK9E7VBQBMFbtYfDgWTLhxTtnLQ_beXbM",
+            authDomain: "basc-blood-bank.firebaseapp.com",
+            databaseURL: "https://basc-blood-bank-default-rtdb.firebaseio.com",
+            projectId: "basc-blood-bank",
+            storageBucket: "basc-blood-bank.firebasestorage.app",
+            messagingSenderId: "854027391923",
+            appId: "1:854027391923:android:22003efb50f74cd78c71c6"
+        };
+        
+        // Initialize Firebase
+        let app;
+        let database;
+        let donorsRef;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            donorsRef = database.ref('Users');
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+        
+        // Application State
+        let donorsData = [];
+        let filteredData = [];
+        let bloodChart = null;
+        
+        // DOM Elements
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMenu = document.getElementById('closeMenu');
+        const searchBox = document.getElementById('searchBox');
+        const bloodFilter = document.getElementById('bloodFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const loadingState = document.getElementById('loadingState');
+        const donorTable = document.getElementById('donorTable');
+        const donorCards = document.getElementById('donorCards');
+        const bloodSummary = document.getElementById('bloodSummary');
+        const noResults = document.getElementById('noResults');
+        const resultInfo = document.getElementById('resultInfo');
+        const tableContainer = document.getElementById('tableContainer');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        const totalDonors = document.getElementById('totalDonors');
+        const totalDonations = document.getElementById('totalDonations');
+        const readyDonors = document.getElementById('readyDonors');
+        
+        // Blood Groups
+        const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+        const bloodGroupColors = {
+            'A+': 'bg-blood-red',
+            'A-': 'bg-red-200',
+            'B+': 'bg-blood-blue',
+            'B-': 'bg-blue-200',
+            'O+': 'bg-blood-green',
+            'O-': 'bg-green-200',
+            'AB+': 'bg-blood-purple',
+            'AB-': 'bg-purple-200'
+        };
+        
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Create animated background
+            createBloodDrops();
+            
+            // Load data from Firebase
+            loadFirebaseData();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Mobile menu
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('mobile-menu');
+            });
+            
+            closeMenu.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+            
+            // Search input
+            searchBox.addEventListener('input', debounce(searchData, 300));
+            
+            // Filters
+            bloodFilter.addEventListener('change', searchData);
+            locationFilter.addEventListener('change', searchData);
+            
+            // Forms
+            document.getElementById('donorForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registerDonor();
+            });
+            
+            document.getElementById('emergencyForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitEmergencyRequest();
+            });
+            
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', handleResize);
+        }
+        
+        // Create animated blood drops
+        function createBloodDrops() {
+            const container = document.getElementById('bloodDrops');
+            for (let i = 0; i < 15; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'blood-drop';
+                drop.style.left = `${Math.random() * 100}%`;
+                drop.style.animationDelay = `${Math.random() * 15}s`;
+                drop.style.opacity = `${0.1 + Math.random() * 0.2}`;
+                container.appendChild(drop);
+            }
+        }
+        
+        // Load data from Firebase
+        async function loadFirebaseData() {
+            try {
+                // Show loading state
+                loadingState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                cardsContainer.classList.add('hidden');
+                noResults.classList.add('hidden');
+                
+                // Fetch data from Firebase
+                const snapshot = await donorsRef.once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    // Process Firebase data
+                    processFirebaseData(data);
+                } else {
+                    // If no data in Firebase, show empty state
+                    showEmptyState();
+                }
+                
+                // Update UI
+                updateBloodSummary();
+                searchData();
+                updateStatistics();
+                initializeChart();
+                
+                // Hide loading state
+                loadingState.classList.add('hidden');
+                
+                // Show success message
+                showToast('সফল!', `${donorsData.length} জন রক্তদাতার তথ্য লোড হয়েছে`);
+                
+            } catch (error) {
+                console.error('Error loading Firebase data:', error);
+                showErrorState();
+            }
+        }
+        
+        // Process Firebase data
+        function processFirebaseData(firebaseData) {
+            donorsData = [];
+            
+            Object.keys(firebaseData).forEach(key => {
+                const donor = firebaseData[key];
+                
+                // Normalize donor data
+                const normalizedDonor = {
+                    id: key,
+                    name: donor.name || donor.Name || 'Unknown',
+                    bloodGroup: normalizeBloodGroup(donor.bloodGroup || donor.blood_group || donor.type || 'O+'),
+                    mobile: donor.mobile || donor.phone || donor.Mobile || 'N/A',
+                    address: donor.address || donor.Address || donor.location || 'চাঁদপুর',
+                    lastDonation: donor.lastDonation || donor.lastDonate || donor.last_donation || '',
+                    totalDonations: parseInt(donor.totalDonations || donor.total || donor.total_donations || 0),
+                    email: donor.email || donor.Email || '',
+                    age: donor.age || donor.Age || '',
+                    gender: donor.gender || donor.Gender || '',
+                    weight: donor.weight || donor.Weight || ''
+                };
+                
+                // Calculate days since last donation and determine status
+                const daysSinceLastDonation = calculateDaysSinceLastDonation(normalizedDonor.lastDonation);
+                normalizedDonor.daysSinceLastDonation = daysSinceLastDonation;
+                
+                // Determine status based on days since last donation
+                // ১০০+ দিন = সক্রিয়, <১০০ দিন = নিষ্ক্রিয়
+                if (daysSinceLastDonation === null) {
+                    normalizedDonor.status = 'অজানা';
+                    normalizedDonor.statusClass = 'status-unknown';
+                } else if (daysSinceLastDonation >= 100) {
+                    normalizedDonor.status = 'সক্রিয়';
+                    normalizedDonor.statusClass = 'status-active';
+                } else {
+                    normalizedDonor.status = 'নিষ্ক্রিয়';
+                    normalizedDonor.statusClass = 'status-inactive';
+                }
+                
+                donorsData.push(normalizedDonor);
+            });
+            
+            filteredData = [...donorsData];
+        }
+        
+        // Calculate days since last donation
+        function calculateDaysSinceLastDonation(lastDonationDate) {
+            if (!lastDonationDate || lastDonationDate === 'N/A' || lastDonationDate.trim() === '') {
+                return null;
+            }
+            
+            try {
+                // Try different date formats
+                let donationDate;
+                
+                // Format: YYYY-MM-DD
+                if (lastDonationDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    donationDate = new Date(lastDonationDate);
+                }
+                // Format: DD-MM-YYYY
+                else if (lastDonationDate.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                    const parts = lastDonationDate.split('-');
+                    donationDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+                // Format: Bengali date (e.g., ২০২৪-০২-১৫)
+                else if (lastDonationDate.match(/^[০-৯]{৪}-[০-৯]{২}-[০-৯]{২}$/)) {
+                    const engDate = lastDonationDate.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+                    donationDate = new Date(engDate);
+                }
+                // Try parsing as is
+                else {
+                    donationDate = new Date(lastDonationDate);
+                }
+                
+                // Check if date is valid
+                if (isNaN(donationDate.getTime())) {
+                    return null;
+                }
+                
+                const today = new Date();
+                const diffTime = Math.abs(today - donationDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                return diffDays;
+            } catch (error) {
+                console.error('Error parsing date:', lastDonationDate, error);
+                return null;
+            }
+        }
+        
+        // Normalize blood group
+        function normalizeBloodGroup(group) {
+            if (!group) return 'O+';
+            
+            group = group.toString().toUpperCase().trim();
+            
+            // Map various formats to standard format
+            if (group.includes('A+') || group.includes('A POSITIVE') || group === 'A' || group === 'A পজিটিভ') return 'A+';
+            if (group.includes('A-') || group.includes('A NEGATIVE') || group === 'A নেগেটিভ') return 'A-';
+            if (group.includes('B+') || group.includes('B POSITIVE') || group === 'B' || group === 'B পজিটিভ') return 'B+';
+            if (group.includes('B-') || group.includes('B NEGATIVE') || group === 'B নেগেটিভ') return 'B-';
+            if (group.includes('O+') || group.includes('O POSITIVE') || group === 'O' || group === 'O পজিটিভ') return 'O+';
+            if (group.includes('O-') || group.includes('O NEGATIVE') || group === 'O নেগেটিভ') return 'O-';
+            if (group.includes('AB+') || group.includes('AB POSITIVE') || group === 'AB' || group === 'AB পজিটিভ') return 'AB+';
+            if (group.includes('AB-') || group.includes('AB NEGATIVE') || group === 'AB নেগেটিভ') return 'AB-';
+            
+            return group;
+        }
+        
+        // Show empty state
+        function showEmptyState() {
+            donorsData = [];
+            filteredData = [];
+            showToast('সতর্কতা', 'Firebase এ কোনো ডাটা পাওয়া যায়নি');
+        }
+        
+        // Show error state
+        function showErrorState() {
+            loadingState.classList.add('hidden');
+            showToast('ত্রুটি', 'Firebase থেকে ডাটা লোড করা যায়নি');
+        }
+        
+        // Update blood group summary
+        function updateBloodSummary() {
+            let summaryHTML = '';
+            const groupCounts = {};
+            
+            // Count donors by blood group
+            donorsData.forEach(donor => {
+                groupCounts[donor.bloodGroup] = (groupCounts[donor.bloodGroup] || 0) + 1;
+            });
+            
+            // Create summary cards for all blood groups
+            bloodGroups.forEach(group => {
+                const count = groupCounts[group] || 0;
+                const colorClass = bloodGroupColors[group] || 'bg-gray-200';
+                
+                summaryHTML += `
+                    <div class="text-center p-4 rounded-xl shadow ${colorClass} hover-card">
+                        <div class="text-xl font-bold mb-1">${group}</div>
+                        <div class="text-3xl font-black">${count}</div>
+                        <div class="text-xs text-gray-600">জন ডোনার</div>
+                    </div>
+                `;
+            });
+            
+            bloodSummary.innerHTML = summaryHTML;
+        }
+        
+        // Search and filter data
+        function searchData() {
+            const searchTerm = searchBox.value.toLowerCase();
+            const bloodTerm = bloodFilter.value;
+            const locationTerm = locationFilter.value;
+            
+            filteredData = donorsData.filter(donor => {
+                // Search by name or mobile
+                const matchesSearch = !searchTerm || 
+                    donor.name.toLowerCase().includes(searchTerm) ||
+                    donor.mobile.includes(searchTerm);
+                
+                // Filter by blood group
+                const matchesBlood = !bloodTerm || donor.bloodGroup === bloodTerm;
+                
+                // Filter by location
+                const matchesLocation = !locationTerm || donor.address.includes(locationTerm);
+                
+                return matchesSearch && matchesBlood && matchesLocation;
+            });
+            
+            // Update result info
+            resultInfo.innerHTML = `মোট <span class="font-bold text-red-600">${filteredData.length}</span> জন`;
+            
+            // Show/hide no results
+            if (filteredData.length === 0) {
+                noResults.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                cardsContainer.classList.add('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                
+                // Render appropriate view based on screen size
+                if (window.innerWidth >= 1024) {
+                    renderDesktopTable();
+                    tableContainer.classList.remove('hidden');
+                    cardsContainer.classList.add('hidden');
+                } else {
+                    renderMobileCards();
+                    tableContainer.classList.add('hidden');
+                    cardsContainer.classList.remove('hidden');
+                }
+            }
+        }
+        
+        // Render desktop table
+        function renderDesktopTable() {
+            let tableHTML = '';
+            
+            filteredData.forEach(donor => {
+                const colorClass = bloodGroupColors[donor.bloodGroup] || 'bg-gray-200';
+                const daysText = donor.daysSinceLastDonation !== null ? 
+                    `${donor.daysSinceLastDonation} দিন` : 'অজানা';
+                
+                tableHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium">${donor.name}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full font-bold ${colorClass}">
+                                ${donor.bloodGroup}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="tel:${donor.mobile}" class="text-blue-600 hover:underline">
+                                ${donor.mobile}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4">${donor.address}</td>
+                        <td class="px-6 py-4">${donor.lastDonation || 'N/A'}</td>
+                        <td class="px-6 py-4 font-medium ${donor.daysSinceLastDonation >= 100 ? 'text-green-600' : 'text-red-600'}">
+                            ${daysText}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-sm font-bold ${donor.statusClass}">
+                                ${donor.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <a href="tel:${donor.mobile}" 
+                                   class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center hover:bg-green-200 transition">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                                <a href="https://wa.me/88${donor.mobile.replace(/\D/g, '')}" 
+                                   target="_blank"
+                                   class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-200 transition">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            donorTable.innerHTML = tableHTML;
+        }
+        
+        // Render mobile cards
+        function renderMobileCards() {
+            let cardsHTML = '';
+            
+            filteredData.forEach(donor => {
+                const colorClass = bloodGroupColors[donor.bloodGroup] || 'bg-gray-200';
+                const daysText = donor.daysSinceLastDonation !== null ? 
+                    `${donor.daysSinceLastDonation} দিন` : 'অজানা';
+                
+                cardsHTML += `
+                    <div class="bg-white rounded-xl p-5 shadow border hover-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">${donor.name}</h3>
+                                <p class="text-gray-600 text-sm">${donor.address}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full font-bold ${colorClass}">
+                                ${donor.bloodGroup}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-gray-400 w-5"></i>
+                                <a href="tel:${donor.mobile}" class="ml-2 text-blue-600">${donor.mobile}</a>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-check text-gray-400 w-5"></i>
+                                <span class="ml-2">সর্বশেষ: ${donor.lastDonation || 'N/A'}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-clock text-gray-400 w-5"></i>
+                                <span class="ml-2 ${donor.daysSinceLastDonation >= 100 ? 'text-green-600 font-medium' : 'text-red-600'}">
+                                    ${daysText} আগে
+                                </span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-tint text-gray-400 w-5"></i>
+                                <span class="ml-2">মোট দান: ${donor.totalDonations} বার</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="px-3 py-1 rounded-full text-sm font-bold ${donor.statusClass}">
+                                ${donor.status}
+                            </span>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <a href="tel:${donor.mobile}" 
+                               class="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition text-center">
+                                <i class="fas fa-phone mr-1"></i>কল
+                            </a>
+                            <a href="https://wa.me/88${donor.mobile.replace(/\D/g, '')}" 
+                               target="_blank"
+                               class="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition text-center">
+                                <i class="fab fa-whatsapp mr-1"></i>হোয়াটসঅ্যাপ
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            donorCards.innerHTML = cardsHTML;
+        }
+        
+        // Filter by blood group
+        function filterByGroup(group) {
+            bloodFilter.value = group;
+            searchData();
+            showToast('ফিল্টার প্রয়োগ করা হয়েছে', `${group} গ্রুপের রক্তদাতা দেখানো হচ্ছে`);
+        }
+        
+        // Clear all filters
+        function clearFilters() {
+            searchBox.value = '';
+            bloodFilter.value = '';
+            locationFilter.value = '';
+            searchData();
+            showToast('ফিল্টার রিসেট', 'সব ফিল্টার রিসেট করা হয়েছে');
+        }
+        
+        // Update statistics
+        function updateStatistics() {
+            if (!donorsData.length) return;
+            
+            // Count total donors
+            const totalDonorsCount = donorsData.length;
+            
+            // Count active donors (last donation 100+ days ago)
+            const activeDonorsCount = donorsData.filter(donor => 
+                donor.daysSinceLastDonation !== null && donor.daysSinceLastDonation >= 100
+            ).length;
+            
+            // Calculate total donations
+            const totalDonationsCount = donorsData.reduce((sum, donor) => 
+                sum + (donor.totalDonations || 0), 0
+            );
+            
+            // Update statistics
+            totalDonors.textContent = totalDonorsCount;
+            totalDonations.textContent = totalDonationsCount;
+            readyDonors.textContent = activeDonorsCount;
+        }
+        
+        // Initialize chart
+        function initializeChart() {
+            const ctx = document.getElementById('bloodChart').getContext('2d');
+            
+            // Count donors by blood group
+            const groupCounts = {};
+            bloodGroups.forEach(group => {
+                groupCounts[group] = 0;
+            });
+            
+            donorsData.forEach(donor => {
+                if (groupCounts[donor.bloodGroup] !== undefined) {
+                    groupCounts[donor.bloodGroup]++;
+                }
+            });
+            
+            bloodChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: bloodGroups,
+                    datasets: [{
+                        data: bloodGroups.map(group => groupCounts[group]),
+                        backgroundColor: [
+                            '#EF4444', '#FCA5A5', // A+, A-
+                            '#3B82F6', '#93C5FD', // B+, B-
+                            '#10B981', '#86EFAC', // O+, O-
+                            '#A855F7', '#D8B4FE'  // AB+, AB-
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Noto Sans Bengali', sans-serif",
+                                    size: 12
+                                },
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Open donor form
+       // Open donor form - পরিবর্তিত ফাংশন
+function openDonorForm() {
+    showToast('সেবা বন্ধ', 'নিবন্ধন সেবাটি বন্ধ আছে। নিবন্ধন করতে আমাদের অ্যাপ ব্যবহার করুন।');
 }
-
-// Render summary
-function renderSummary(){
-  const summaryDiv = document.getElementById("donorSummary");
-  const counts = {};
-  Object.values(donorsData).forEach(d=>{
-    counts[d.type] = (counts[d.type]||0)+1;
-  });
-  
-  summaryDiv.innerHTML = "";
-  const colors = {
-    "A Positive": "bg-red-500",
-    "A Negative": "bg-red-300",
-    "B Positive": "bg-blue-500",
-    "B Negative": "bg-blue-300",
-    "O Positive": "bg-green-500",
-    "O Negative": "bg-green-300",
-    "AB Positive": "bg-pink-400",
-    "AB Negative": "bg-pink-200"
-  };
-  
-  Object.keys(counts).forEach(type=>{
-    const count = counts[type];
-    const colorClass = colors[type] || "bg-gray-400";
-    summaryDiv.innerHTML += `
-      <div class="px-4 py-2 rounded-xl text-white font-semibold ${colorClass}">
-        ${type}: ${count} জন
-      </div>
-    `;
-  });
-}
-
-// Render Table & Cards
-function render(){
-  const searchText = searchInput.value.toLowerCase();
-  const groupText = groupFilter.value;
-  const today = new Date();
-  const filtered = Object.values(donorsData).filter(d =>
-    d.name.toLowerCase().includes(searchText) &&
-    (groupText==="" || d.type===groupText)
-  );
-
-  // Table
-  donorTable.innerHTML="";
-  if(filtered.length===0) donorTable.innerHTML='<tr><td colspan="7" class="text-center py-4">কোনও ডোনার পাওয়া যায়নি।</td></tr>';
-  else filtered.forEach(d=>{
-    const lastDonateDate = new Date(d.lastDonate);
-    const isRecent = (today-lastDonateDate)/(1000*60*60*24)<=30;
-    donorTable.innerHTML+=`
-      <tr class="hover:bg-gray-100 ${isRecent?'bg-yellow-50':''}">
-        <td class="px-4 py-2 font-medium">${d.name}</td>
-        <td class="px-4 py-2 font-bold text-red-600">${d.type}</td>
-        <td class="px-4 py-2"><a href="tel:${d.mobile}" class="text-blue-600 underline">${d.mobile}</a></td>
-        <td class="px-4 py-2">${d.address}</td>
-        <td class="px-4 py-2">${d.lastDonate}</td>
-        <td class="px-4 py-2">${d.total} ${getBadge(d.total)}</td>
-        <td class="px-4 py-2"><span class="px-2 py-1 rounded text-white ${d.status==="Active"?"bg-green-500":"bg-gray-500"}">${d.status}</span></td>
-      </tr>`;
-  });
-
-  // Cards
-  donorCards.innerHTML="";
-  if(filtered.length===0) donorCards.innerHTML='<p class="text-center py-4">কোনও ডোনার পাওয়া যায়নি।</p>';
-  else filtered.forEach(d=>{
-    const lastDonateDate = new Date(d.lastDonate);
-    const isRecent = (today-lastDonateDate)/(1000*60*60*24)<=30;
-    donorCards.innerHTML+=`
-      <div class="bg-white shadow p-4 rounded-xl border-l-4 ${d.status==="Active"?"border-green-500":"border-gray-500"} ${isRecent?'bg-yellow-50':''}">
-        <h3 class="text-lg font-bold mb-1">${d.name}</h3>
-        <p><span class="font-semibold">গ্রুপ:</span> ${d.type}</p>
-        <p><span class="font-semibold">মোবাইল:</span> <a href="tel:${d.mobile}" class="text-blue-600 underline">${d.mobile}</a></p>
-        <p><span class="font-semibold">ঠিকানা:</span> ${d.address}</p>
-        <p><span class="font-semibold">সর্বশেষ রক্তদান:</span> ${d.lastDonate}</p>
-        <p><span class="font-semibold">মোট রক্তদান:</span> ${d.total} ${getBadge(d.total)}</p>
-        <p><span class="font-semibold">স্ট্যাটাস:</span> <span class="px-2 py-1 rounded text-white ${d.status==="Active"?"bg-green-500":"bg-gray-500"}">${d.status}</span></p>
-      </div>`;
-  });
-}
-
-// Render Chart
-function renderChart(){
-  const counts={};
-  Object.values(donorsData).forEach(d=>{ counts[d.type]= (counts[d.type]||0)+1; });
-  const ctx = document.getElementById("bloodChart").getContext("2d");
-  new Chart(ctx,{
-    type:'pie',
-    data:{
-      labels:Object.keys(counts).map(type=>`${type} (${counts[type]})`),
-      datasets:[{data:Object.values(counts), backgroundColor:[
-        '#f87171','#fca5a5', // A+ , A-
-        '#60a5fa','#93c5fd', // B+ , B-
-        '#34d399','#86efac', // O+ , O-
-        '#f9a8d4','#fbcfe8'  // AB+ , AB-
-      ]}]
-    },
-    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
-  });
-}
-
-searchInput.addEventListener("input", render);
-groupFilter.addEventListener("change", render);
-</script>
+        
+        // Register new donor
+        function registerDonor() {
+            const form = document.getElementById('donorForm');
+            if (form.checkValidity()) {
+                // In real app, submit to Firebase
+                showToast('সফল!', 'আপনার নিবন্ধন গ্রহণ করা হয়েছে');
+                closeModal('donorModal');
+                form.reset();
+            }
+        }
+        
+        // Show QR code
+        function showQR() {
+            document.getElementById('qrModal').classList.remove('hidden');
+        }
+        
+        // Open emergency form
+        function openEmergencyForm() {
+            document.getElementById('emergencyModal').classList.remove('hidden');
+        }
+        
+        // Submit emergency request
+        function submitEmergencyRequest() {
+            const form = document.getElementById('emergencyForm');
+            if (form.checkValidity()) {
+                // In real app, submit to Firebase
+                showToast('সফল!', 'আপনার জরুরী অনুরোধ পাঠানো হয়েছে');
+                closeModal('emergencyModal');
+                form.reset();
+            }
+        }
+        
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+        
+        // Show toast notification
+        function showToast(title, message) {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+        
+        // Handle window resize
+        function handleResize() {
+            if (filteredData.length > 0) {
+                if (window.innerWidth >= 1024) {
+                    renderDesktopTable();
+                    tableContainer.classList.remove('hidden');
+                    cardsContainer.classList.add('hidden');
+                } else {
+                    renderMobileCards();
+                    tableContainer.classList.add('hidden');
+                    cardsContainer.classList.remove('hidden');
+                }
+            }
+        }
+        
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Make functions globally available
+        window.searchData = searchData;
+        window.filterByGroup = filterByGroup;
+        window.clearFilters = clearFilters;
+        window.openDonorForm = openDonorForm;
+        window.openEmergencyForm = openEmergencyForm;
+        window.showQR = showQR;
+        window.closeModal = closeModal;
+    </script>
 </body>
 </html>
